@@ -1,165 +1,253 @@
 "use client";
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { create, all, MathJsStatic } from 'mathjs';
 
 export type HistoryItem = {
   expression: string;
   result: string;
 };
 
-// A very simple and limited expression evaluator.
-// For a real-world scenario, a more robust library would be necessary.
-const evaluateExpression = (expression: string): number => {
-    // Replace user-friendly operators with JS-friendly ones
-    let evalFriendlyExpression = expression
-        .replace(/×/g, '*')
-        .replace(/÷/g, '/')
-        .replace(/−/g, '-')
-        .replace(/\^/g, '**');
+type CalculatorState = {
+  expression: string;
+  display: string;
+  history: HistoryItem[];
+  isResult: boolean;
+  angleMode: 'deg' | 'rad';
+  memory: number;
+};
 
-    // Handle sqrt() and other functions if needed, although current logic applies them immediately.
-    // This basic eval does not respect order of operations beyond what Function constructor does.
+let math: MathJsStatic;
+
+const initializeMathJs = (angleMode: 'deg' | 'rad') => {
+  math = create(all, {
+    number: 'BigNumber',
+    precision: 64,
+  });
+
+  // Override specific functions for degree mode
+  if (angleMode === 'deg') {
+    const sin = math.sin;
+    math.sin = (x) => sin(math.multiply(x, math.pi) / 180);
+    const cos = math.cos;
+    math.cos = (x) => cos(math.multiply(x, math.pi) / 180);
+    const tan = math.tan;
+    math.tan = (x) => tan(math.multiply(x, math.pi) / 180);
+    const asin = math.asin;
+    math.asin = (x) => math.multiply(asin(x), 180) / math.pi;
+    const acos = math.acos;
+    math.acos = (x) => math.multiply(acos(x), 180) / math.pi;
+    const atan = math.atan;
+    math.atan = (x) => math.multiply(atan(x), 180) / math.pi;
+  }
+};
+
+const formatResult = (result: any) => {
     try {
-        // This is a security risk in a real app, but for this contained example it's a simple way to evaluate.
-        return new Function('return ' + evalFriendlyExpression)();
-    } catch (error) {
-        console.error("Evaluation error:", error);
-        return NaN; // Indicate an error
+        if (math.isComplex(result)) {
+            return result.toString();
+        }
+        return math.format(result, { notation: 'auto', precision: 15 });
+    } catch {
+        return "Error";
     }
 };
 
-const factorial = (n: number): number => {
-    if (n < 0) return NaN; // Factorial is not defined for negative numbers
-    if (n === 0) return 1;
-    let result = 1;
-    for (let i = 2; i <= n; i++) {
-        result *= i;
-    }
-    return result;
-}
-
+const initialState: CalculatorState = {
+  expression: '',
+  display: '0',
+  history: [],
+  isResult: false,
+  angleMode: 'deg',
+  memory: 0,
+};
 
 export function useScientificCalculator() {
-  const [displayValue, setDisplayValue] = useState<string>('0');
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [isResult, setIsResult] = useState(false);
+  const [state, setState] = useState<CalculatorState>(initialState);
+
+  useEffect(() => {
+    // Load state from localStorage on initial render
+    try {
+      const savedState = localStorage.getItem('scientificCalculatorState');
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        initializeMathJs(parsedState.angleMode || 'deg');
+        setState(parsedState);
+      } else {
+        initializeMathJs('deg');
+      }
+    } catch (error) {
+      // If parsing fails, start with a clean state
+      initializeMathJs('deg');
+      setState(initialState);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save state to localStorage whenever it changes
+    try {
+      localStorage.setItem('scientificCalculatorState', JSON.stringify(state));
+    } catch (error) {
+      console.error("Could not save state to localStorage", error);
+    }
+  }, [state]);
 
 
-  const inputDigit = (digit: string) => {
-    if (isResult) {
-        setDisplayValue(digit);
-        setIsResult(false);
+  const setAngleMode = (mode: 'deg' | 'rad') => {
+    initializeMathJs(mode);
+    setState(prevState => ({ ...prevState, angleMode: mode }));
+  };
+
+  const updateState = (newState: Partial<CalculatorState>) => {
+    setState(prevState => ({ ...prevState, ...newState }));
+  };
+
+  const handleInput = (input: string, isOperator = false) => {
+    if (state.isResult) {
+        if (isOperator) {
+            updateState({ expression: state.display + input, display: state.display + input, isResult: false });
+        } else {
+            updateState({ expression: input, display: input, isResult: false });
+        }
     } else {
-        setDisplayValue(displayValue === '0' ? digit : displayValue + digit);
+        const newExpression = state.expression === '0' && !isOperator ? input : state.expression + input;
+        const newDisplay = state.display === '0' && !isOperator ? input : state.display + input;
+        updateState({ expression: newExpression, display: newDisplay });
     }
   };
 
-  const inputDecimal = () => {
-    if (isResult) {
-        setDisplayValue('0.');
-        setIsResult(false);
-        return;
-    }
-    if (!displayValue.includes('.')) {
-      setDisplayValue(displayValue + '.');
+  const inputDigit = (digit: string) => handleInput(digit);
+  const inputOperator = (operator: string) => handleInput(operator, true);
+
+  const inputFunction = (func: string) => {
+     if (state.isResult) {
+      updateState({ expression: func, display: func, isResult: false });
+    } else {
+      updateState({
+        expression: state.expression + func,
+        display: state.display + func
+      });
     }
   };
 
-  const clearInput = () => {
-    setDisplayValue('0');
-    setIsResult(false);
+  const calculate = () => {
+    if (state.expression === '') return;
+    try {
+      let evalExpression = state.expression.replace(/π/g, 'pi').replace(/√/g, 'sqrt');
+      const result = math.evaluate(evalExpression);
+      const formattedResult = formatResult(result);
+      
+      if (formattedResult === "Error") throw new Error("Invalid calculation");
+
+      const newHistoryItem: HistoryItem = {
+        expression: state.expression,
+        result: formattedResult,
+      };
+
+      updateState({
+        display: formattedResult,
+        history: [newHistoryItem, ...state.history.slice(0, 49)],
+        isResult: true,
+      });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Invalid Expression";
+        updateState({
+            display: 'Error',
+            expression: errorMessage,
+            isResult: true,
+        });
+    }
   };
-  
-  const handleOperator = (operator: string) => {
-    setIsResult(false);
-    if (operator === 'sqrt') {
-      handleFunction('sqrt');
+
+  const clear = () => {
+    updateState({ expression: '', display: '0', isResult: false });
+  };
+
+  const backspace = () => {
+    if (state.isResult) {
+      clear();
       return;
     }
-    setDisplayValue(displayValue + ` ${operator} `);
-  }
-
-  const handleFunction = (func: string) => {
-    const currentValue = parseFloat(displayValue);
-    let result: number | string = 0;
-    let expression = `${func}(${displayValue})`;
-
-    switch(func) {
-        case 'sin':
-            result = Math.sin(currentValue * Math.PI / 180); // Assuming degree input
-            break;
-        case 'cos':
-            result = Math.cos(currentValue * Math.PI / 180); // Assuming degree input
-            break;
-        case 'tan':
-            result = Math.tan(currentValue * Math.PI / 180); // Assuming degree input
-            break;
-        case 'log':
-            result = Math.log10(currentValue);
-            break;
-        case 'ln':
-            result = Math.log(currentValue);
-            break;
-        case '!':
-            result = factorial(currentValue);
-            expression = `${displayValue}!`;
-            break;
-        case 'sqrt':
-            result = Math.sqrt(currentValue);
-            expression = `√(${displayValue})`;
-            break;
-        case 'pi':
-            result = Math.PI;
-            expression = 'π';
-            break;
-        case 'e':
-            result = Math.E;
-            expression = 'e';
-            break;
-        default:
-            return;
+    updateState({
+      expression: state.expression.slice(0, -1),
+      display: state.display.slice(0, -1) || '0',
+    });
+  };
+  
+  const toggleSign = () => {
+     if (state.display !== '0') {
+        if (state.isResult) {
+            const negatedResult = (parseFloat(state.display) * -1).toString();
+            updateState({
+                display: negatedResult,
+                expression: negatedResult
+            });
+        } else {
+            // This is a simplified implementation. A more robust solution
+            // would involve parsing the expression to find the last number.
+            if(state.display.startsWith('-')) {
+                updateState({
+                    display: state.display.substring(1),
+                    expression: state.expression.substring(1),
+                });
+            } else {
+                 updateState({
+                    display: `-${state.display}`,
+                    expression: `-${state.expression}`,
+                });
+            }
+        }
     }
+  };
 
-    const resultString = String(parseFloat(result.toPrecision(15)));
-    setHistory(prev => [{ expression, result: resultString }, ...prev]);
-    setDisplayValue(resultString);
-    setIsResult(true);
-  }
+  const inputPercent = () => {
+    if (state.isResult) {
+      const percentValue = parseFloat(state.display) / 100;
+      updateState({
+        display: percentValue.toString(),
+        expression: percentValue.toString(),
+        isResult: true,
+      });
+    } else {
+        handleInput('/100');
+    }
+  };
 
-  const handleEquals = () => {
-    try {
-        // A simple eval is used here. For a real app, a proper math expression parser is needed.
-        const expression = displayValue.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/\^/g, '**');
-        const result = eval(expression);
-        const resultString = String(parseFloat(result.toPrecision(15)));
-
-        const newHistoryItem: HistoryItem = {
-          expression: displayValue,
-          result: resultString
-        };
-        setHistory(prev => [newHistoryItem, ...prev]);
-
-        setDisplayValue(resultString);
-        setIsResult(true);
-    } catch (error) {
-        setDisplayValue('Error');
-        setIsResult(true);
+  const memoryClear = () => updateState({ memory: 0 });
+  const memoryRecall = () => {
+    handleInput(state.memory.toString());
+  };
+  const memoryAdd = () => {
+    const currentDisplayValue = parseFloat(state.display);
+    if (!isNaN(currentDisplayValue)) {
+      updateState(prevState => ({ memory: prevState.memory + currentDisplayValue }));
+    }
+  };
+  const memorySubtract = () => {
+    const currentDisplayValue = parseFloat(state.display);
+    if (!isNaN(currentDisplayValue)) {
+      updateState(prevState => ({ memory: prevState.memory - currentDisplayValue }));
     }
   };
 
   const clearHistory = () => {
-    setHistory([]);
-  };
+    updateState({ history: [] });
+  }
 
   return {
-    displayValue,
-    history,
+    state,
     inputDigit,
-    inputDecimal,
-    clearInput,
-    handleOperator,
-    handleEquals,
-    handleFunction,
+    inputOperator,
+    inputFunction,
+    calculate,
+    clear,
+    backspace,
+    toggleSign,
+    inputPercent,
+    memoryClear,
+    memoryRecall,
+    memoryAdd,
+    memorySubtract,
+    setAngleMode,
     clearHistory
   };
 }

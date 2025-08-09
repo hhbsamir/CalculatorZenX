@@ -1,147 +1,167 @@
 "use client";
 
-import { History, Sigma } from 'lucide-react';
+import { History, Sigma, Copy, Trash2, Pilcrow, CornerUpLeft, PlusMinus, Percent, Divide, X, Minus, Plus, Equal, Eraser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { useScientificCalculator, type HistoryItem } from '@/hooks/use-scientific-calculator';
 import { ScrollArea } from './ui/scroll-area';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { useToast } from "@/hooks/use-toast"
 
 export function ScientificCalculator() {
+  const { toast } = useToast()
   const {
-    displayValue,
-    history,
+    state,
     inputDigit,
-    inputDecimal,
-    clearInput,
-    handleOperator,
-    handleEquals,
-    handleFunction,
-    clearHistory,
+    inputOperator,
+    inputFunction,
+    calculate,
+    clear,
+    backspace,
+    toggleSign,
+    inputPercent,
+    memoryClear,
+    memoryRecall,
+    memoryAdd,
+    memorySubtract,
+    setAngleMode,
+    clearHistory
   } = useScientificCalculator();
 
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(state.display);
+    toast({
+      title: "Copied to clipboard!",
+      description: "The result has been copied to your clipboard.",
+    })
+  }
+
   const renderHistory = () => (
-    history.length === 0 ? (
-      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-        <History className="w-16 h-16 mb-4" />
-        <p className="text-lg">No history yet.</p>
-        <p>Your past calculations will appear here.</p>
-      </div>
-    ) : (
-      <div className="flex flex-col h-full">
-        <ScrollArea className="flex-grow">
-          <div className="space-y-4 pr-6">
-            {history.map((item: HistoryItem, index: number) => (
-              <div key={index} className="text-right">
-                <p className="text-sm text-muted-foreground">{item.expression} =</p>
-                <p className="text-2xl font-bold">{item.result}</p>
+    <div className="flex flex-col h-full">
+        <SheetHeader>
+          <SheetTitle>Calculation History</SheetTitle>
+          <SheetDescription>
+            Click on a previous calculation to use it again.
+          </SheetDescription>
+        </SheetHeader>
+      {state.history.length === 0 ? (
+        <div className="flex flex-col items-center justify-center flex-grow text-center text-muted-foreground">
+          <History className="w-16 h-16 mb-4" />
+          <p className="text-lg">No history yet.</p>
+          <p>Your past calculations will appear here.</p>
+        </div>
+      ) : (
+        <>
+        <ScrollArea className="flex-grow my-4 pr-6">
+          <div className="space-y-4">
+            {state.history.map((item: HistoryItem, index: number) => (
+              <div key={index} className="text-right transition-colors hover:bg-muted/50 p-2 rounded-md">
+                <p className="text-sm text-muted-foreground cursor-pointer" onClick={() => inputFunction(item.expression)}>{item.expression} =</p>
+                <p className="text-2xl font-bold cursor-pointer" onClick={() => inputFunction(item.result)}>{item.result}</p>
               </div>
             ))}
           </div>
         </ScrollArea>
-        <SheetFooter className="mt-4 pt-4 border-t">
+        <SheetFooter className="mt-auto pt-4 border-t">
             <Button variant="outline" onClick={clearHistory}>
-                Clear History
+                <Trash2 className="mr-2 h-4 w-4" /> Clear History
             </Button>
             <SheetClose asChild>
                 <Button>Close</Button>
             </SheetClose>
         </SheetFooter>
-      </div>
-    )
+        </>
+      )}
+    </div>
   );
-  
-  const functionButtons = [
-    { label: 'sin', handler: () => handleFunction('sin') },
-    { label: 'cos', handler: () => handleFunction('cos') },
-    { label: 'tan', handler: () => handleFunction('tan') },
-    { label: 'log', handler: () => handleFunction('log') },
-    { label: 'ln', handler: () => handleFunction('ln') },
-    { label: '√', handler: () => handleOperator('sqrt') },
-    { label: 'xʸ', handler: () => handleOperator('^') },
-    { label: 'x!', handler: () => handleFunction('!') },
-    { label: 'π', handler: () => handleFunction('pi') },
-    { label: 'e', handler: () => handleFunction('e') },
-  ];
 
-  const buttons = [
-    { label: 'AC', handler: clearInput, className: 'bg-accent text-accent-foreground hover:bg-accent/90' },
-    { label: '(', handler: () => inputDigit('(') },
-    { label: ')', handler: () => inputDigit(')') },
-    { label: '÷', handler: () => handleOperator('/'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
-    { label: '7', handler: () => inputDigit('7') },
-    { label: '8', handler: () => inputDigit('8') },
-    { label: '9', handler: () => inputDigit('9') },
-    { label: '×', handler: () => handleOperator('*'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
-    { label: '4', handler: () => inputDigit('4') },
-    { label: '5', handler: () => inputDigit('5') },
-    { label: '6', handler: () => inputDigit('6') },
-    { label: '−', handler: () => handleOperator('-'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
-    { label: '1', handler: () => inputDigit('1') },
-    { label: '2', handler: () => inputDigit('2') },
-    { label: '3', handler: () => inputDigit('3') },
-    { label: '+', handler: () => handleOperator('+'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
-    { label: '0', handler: () => inputDigit('0'), className: 'col-span-2' },
-    { label: '.', handler: inputDecimal },
-    { label: '=', handler: handleEquals, className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
-  ];
+  const buttonClass = "text-xl sm:text-2xl h-14 sm:h-16 transition-transform duration-100 active:scale-95 focus:z-10";
+  const primaryButtonClass = `${buttonClass} bg-primary/10 text-primary hover:bg-primary/20`;
+  const secondaryButtonClass = `${buttonClass} bg-secondary text-secondary-foreground hover:bg-secondary/80`;
+  const accentButtonClass = `${buttonClass} bg-accent text-accent-foreground hover:bg-accent/90`;
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-card p-4 sm:p-6 rounded-2xl shadow-2xl space-y-4 border">
-        <div className="relative">
-             <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="absolute top-2 left-2 text-muted-foreground z-10">
-                        <History className="h-5 w-5" />
-                    </Button>
-                </SheetTrigger>
-                <SheetContent>
-                    <SheetHeader>
-                        <SheetTitle>Calculation History</SheetTitle>
-                    </SheetHeader>
-                    {renderHistory()}
-                </SheetContent>
-            </Sheet>
-             <div className="w-full bg-background/50 rounded-lg p-4 text-right overflow-hidden break-words min-h-[7rem] flex flex-col justify-end">
-                <span className="text-5xl font-bold tracking-wider">{displayValue}</span>
-            </div>
+    <div className="w-full max-w-4xl mx-auto bg-card p-4 sm:p-6 rounded-2xl shadow-2xl space-y-4 border">
+      {/* Display */}
+      <div className="relative bg-background/50 rounded-lg p-4 text-right overflow-hidden break-words min-h-[8rem] flex flex-col justify-end">
+        <div className="absolute top-2 left-2 flex items-center gap-2 z-10">
+          <Sheet>
+              <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground">
+                      <History className="h-5 w-5" />
+                  </Button>
+              </SheetTrigger>
+              <SheetContent>
+                  {renderHistory()}
+              </SheetContent>
+          </Sheet>
+          <ToggleGroup type="single" defaultValue="deg" onValueChange={(value) => setAngleMode(value as 'deg' | 'rad')} aria-label="Angle Mode">
+            <ToggleGroupItem value="deg" aria-label="Degrees">Deg</ToggleGroupItem>
+            <ToggleGroupItem value="rad" aria-label="Radians">Rad</ToggleGroupItem>
+          </ToggleGroup>
         </div>
+        <p className="text-muted-foreground h-6">{state.expression}</p>
+        <div className="flex items-center justify-end">
+            <span className="text-5xl font-bold tracking-wider">{state.display}</span>
+            <Button variant="ghost" size="icon" className="text-muted-foreground ml-2" onClick={handleCopyToClipboard}>
+                <Copy className="h-6 w-6" />
+            </Button>
+        </div>
+      </div>
       
-      <div className="grid grid-cols-5 grid-rows-5 gap-2 sm:gap-3">
-        {/* Scientific Functions */}
-        <div className="col-span-1 grid grid-rows-5 gap-2 sm:gap-3">
-            {functionButtons.slice(0, 5).map(btn => (
-                 <Button
-                    key={btn.label}
-                    onClick={btn.handler}
-                    className="text-lg h-full transition-transform duration-100 active:scale-95 bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                >
-                    {btn.label}
-                </Button>
-            ))}
-        </div>
-        {/* Main calculator buttons */}
-        <div className="col-span-4 grid grid-cols-4 grid-rows-5 gap-2 sm:gap-3">
-            {buttons.map(btn => (
-                <Button
-                    key={btn.label}
-                    onClick={btn.handler}
-                    className={`text-2xl h-16 sm:h-20 transition-transform duration-100 active:scale-95 ${btn.className || 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
-                >
-                    {btn.label}
-                </Button>
-            ))}
-        </div>
-         {/* More Scientific Functions */}
-        <div className="col-span-5 grid grid-cols-5 gap-2 sm:gap-3">
-            {functionButtons.slice(5).map(btn => (
-                 <Button
-                    key={btn.label}
-                    onClick={btn.handler}
-                    className="text-lg h-16 sm:h-20 transition-transform duration-100 active:scale-95 bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                >
-                    {btn.label}
-                </Button>
-            ))}
+      {/* Buttons */}
+      <div className="grid grid-cols-7 gap-2">
+        {/* Row 1 */}
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('sin(')}>sin</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('cos(')}>cos</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('tan(')}>tan</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('^')}>xʸ</Button>
+        <Button className={accentButtonClass} onClick={clear}>C</Button>
+        <Button className={accentButtonClass} onClick={backspace}><CornerUpLeft /></Button>
+        <Button className={primaryButtonClass} onClick={() => inputOperator('/')}><Divide /></Button>
+        
+        {/* Row 2 */}
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('asin(')}>sin⁻¹</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('acos(')}>cos⁻¹</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('atan(')}>tan⁻¹</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('sqrt(')}>√</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('7')}>7</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('8')}>8</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('9')}>9</Button>
+
+        {/* Row 3 */}
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('ln(')}>ln</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('log10(')}>log</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('!')}>n!</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('^2')}>x²</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('4')}>4</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('5')}>5</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('6')}>6</Button>
+
+        {/* Row 4 */}
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('(')}>(</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction(')')}>)</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('E')}>e</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('pi')}>π</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('1')}>1</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('2')}>2</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('3')}>3</Button>
+
+        {/* Row 5 */}
+        <Button className={secondaryButtonClass} onClick={memoryClear}>MC</Button>
+        <Button className={secondaryButtonClass} onClick={memoryRecall}>MR</Button>
+        <Button className={secondaryButtonClass} onClick={memoryAdd}>M+</Button>
+        <Button className={secondaryButtonClass} onClick={memorySubtract}>M-</Button>
+        <Button className={buttonClass} onClick={toggleSign}><PlusMinus /></Button>
+        <Button className={buttonClass} onClick={() => inputDigit('0')}>0</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('.')}>.</Button>
+        
+        {/* Operators in last column */}
+        <div className="flex flex-col gap-2">
+            <Button className={primaryButtonClass} onClick={() => inputOperator('*')}><X /></Button>
+            <Button className={primaryButtonClass} onClick={() => inputOperator('-')}><Minus /></Button>
+            <Button className={primaryButtonClass} onClick={() => inputOperator('+')}><Plus /></Button>
+            <Button className={`${primaryButtonClass} flex-grow`} onClick={calculate}><Equal /></Button>
         </div>
       </div>
     </div>

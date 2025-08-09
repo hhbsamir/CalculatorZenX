@@ -22,8 +22,8 @@ export const calculatorCategories: CalculatorCategory[] = [
     name: "General",
     calculators: [
       { name: "Standard Calculator", slug: "/", icon: Calculator, description: "For basic arithmetic operations." },
-      { name: "Scientific Calculator", slug: "/scientific-calculator", icon: Sigma, description: "For more complex calculations." },
       { name: "Age Calculator", slug: "age-calculator", icon: User, description: "Calculate age from a birth date." },
+      { name: "Scientific Calculator", slug: "/scientific-calculator", icon: Sigma, description: "For more complex calculations." },
     ],
   },
 ];
