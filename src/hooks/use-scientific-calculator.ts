@@ -16,32 +16,34 @@ type CalculatorState = {
   memory: number;
 };
 
-let math: MathJsStatic;
+let math: MathJsStatic | undefined;
 
 const initializeMathJs = (angleMode: 'deg' | 'rad') => {
-  math = create(all, {
+  const newMath = create(all, {
     number: 'BigNumber',
     precision: 64,
   });
 
   // Override specific functions for degree mode
   if (angleMode === 'deg') {
-    const sin = math.sin;
-    math.sin = (x) => sin(math.multiply(x, math.pi) / 180);
-    const cos = math.cos;
-    math.cos = (x) => cos(math.multiply(x, math.pi) / 180);
-    const tan = math.tan;
-    math.tan = (x) => tan(math.multiply(x, math.pi) / 180);
-    const asin = math.asin;
-    math.asin = (x) => math.multiply(asin(x), 180) / math.pi;
-    const acos = math.acos;
-    math.acos = (x) => math.multiply(acos(x), 180) / math.pi;
-    const atan = math.atan;
-    math.atan = (x) => math.multiply(atan(x), 180) / math.pi;
+    const sin = newMath.sin;
+    newMath.sin = (x) => sin(newMath.multiply(x, newMath.pi) / 180);
+    const cos = newMath.cos;
+    newMath.cos = (x) => cos(newMath.multiply(x, newMath.pi) / 180);
+    const tan = newMath.tan;
+    newMath.tan = (x) => tan(newMath.multiply(x, newMath.pi) / 180);
+    const asin = newMath.asin;
+    newMath.asin = (x) => newMath.multiply(asin(x), 180) / newMath.pi;
+    const acos = newMath.acos;
+    newMath.acos = (x) => newMath.multiply(acos(x), 180) / newMath.pi;
+    const atan = newMath.atan;
+    newMath.atan = (x) => newMath.multiply(atan(x), 180) / newMath.pi;
   }
+  math = newMath;
 };
 
 const formatResult = (result: any) => {
+    if (!math) return "Error";
     try {
         if (math.isComplex(result)) {
             return result.toString();
@@ -130,7 +132,7 @@ export function useScientificCalculator() {
   };
 
   const calculate = () => {
-    if (state.expression === '') return;
+    if (state.expression === '' || !math) return;
     try {
       let evalExpression = state.expression.replace(/π/g, 'pi').replace(/√/g, 'sqrt');
       const result = math.evaluate(evalExpression);
