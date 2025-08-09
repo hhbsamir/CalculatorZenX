@@ -88,7 +88,7 @@ export function Calculator() {
                 </SheetContent>
             </Sheet>
             <div className="w-full bg-background/50 rounded-lg p-4 text-right overflow-hidden break-words">
-                <span className="text-5xl font-bold tracking-wider">{displayValue}</span>
+                <span className="text-4xl sm:text-5xl font-bold tracking-wider">{displayValue}</span>
             </div>
         </div>
       
@@ -97,7 +97,7 @@ export function Calculator() {
           <Button
             key={btn.label}
             onClick={btn.handler}
-            className={`text-2xl h-16 sm:h-20 transition-transform duration-100 active:scale-95 ${btn.className || 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
+            className={`text-xl sm:text-2xl h-16 sm:h-20 transition-transform duration-100 active:scale-95 ${btn.className || 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
           >
             {btn.icon ? <btn.icon /> : btn.label}
           </Button>

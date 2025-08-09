@@ -75,19 +75,19 @@ export function ScientificCalculator() {
     </div>
   );
 
-  const buttonClass = "text-xl sm:text-2xl h-14 sm:h-16 transition-transform duration-100 active:scale-95 focus:z-10";
+  const buttonClass = "text-lg sm:text-xl h-12 sm:h-14 transition-transform duration-100 active:scale-95 focus:z-10";
   const primaryButtonClass = `${buttonClass} bg-primary/10 text-primary hover:bg-primary/20`;
   const secondaryButtonClass = `${buttonClass} bg-secondary text-secondary-foreground hover:bg-secondary/80`;
   const accentButtonClass = `${buttonClass} bg-accent text-accent-foreground hover:bg-accent/90`;
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-card p-4 sm:p-6 rounded-2xl shadow-2xl space-y-4 border">
+    <div className="w-full max-w-2xl mx-auto bg-card p-2 sm:p-4 rounded-2xl shadow-2xl space-y-2 sm:space-y-4 border">
       {/* Display */}
-      <div className="relative bg-background/50 rounded-lg p-4 text-right overflow-hidden break-words min-h-[8rem] flex flex-col justify-end">
+      <div className="relative bg-background/50 rounded-lg p-4 text-right overflow-hidden break-words min-h-[7rem] sm:min-h-[8rem] flex flex-col justify-end">
         <div className="absolute top-2 left-2 flex items-center gap-2 z-10">
           <Sheet>
               <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground">
+                  <Button variant="ghost" size="icon" className="text-muted-foreground h-8 w-8">
                       <History className="h-5 w-5" />
                   </Button>
               </SheetTrigger>
@@ -96,15 +96,15 @@ export function ScientificCalculator() {
               </SheetContent>
           </Sheet>
           <ToggleGroup type="single" defaultValue="deg" onValueChange={(value) => setAngleMode(value as 'deg' | 'rad')} aria-label="Angle Mode">
-            <ToggleGroupItem value="deg" aria-label="Degrees">Deg</ToggleGroupItem>
-            <ToggleGroupItem value="rad" aria-label="Radians">Rad</ToggleGroupItem>
+            <ToggleGroupItem value="deg" aria-label="Degrees" className="h-8 px-2 text-xs">Deg</ToggleGroupItem>
+            <ToggleGroupItem value="rad" aria-label="Radians" className="h-8 px-2 text-xs">Rad</ToggleGroupItem>
           </ToggleGroup>
         </div>
-        <p className="text-muted-foreground h-6">{state.expression}</p>
+        <p className="text-muted-foreground h-6 text-sm sm:text-base">{state.expression}</p>
         <div className="flex items-center justify-end">
-            <span className="text-5xl font-bold tracking-wider">{state.display}</span>
-            <Button variant="ghost" size="icon" className="text-muted-foreground ml-2" onClick={handleCopyToClipboard}>
-                <Copy className="h-6 w-6" />
+            <span className="text-4xl sm:text-5xl font-bold tracking-wider">{state.display}</span>
+            <Button variant="ghost" size="icon" className="text-muted-foreground ml-2 h-8 w-8" onClick={handleCopyToClipboard}>
+                <Copy className="h-5 w-5" />
             </Button>
         </div>
       </div>
