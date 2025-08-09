@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { create, all, MathJsStatic } from 'mathjs';
+import { useState, useEffect, useRef } from 'react';
+import { create, all, type MathJsStatic } from 'mathjs';
 
 export type HistoryItem = {
   expression: string;
@@ -16,44 +16,6 @@ type CalculatorState = {
   memory: number;
 };
 
-let math: MathJsStatic | undefined;
-
-const initializeMathJs = (angleMode: 'deg' | 'rad') => {
-  const newMath = create(all, {
-    number: 'BigNumber',
-    precision: 64,
-  });
-
-  // Override specific functions for degree mode
-  if (angleMode === 'deg') {
-    const sin = newMath.sin;
-    newMath.sin = (x) => sin(newMath.multiply(x, newMath.pi) / 180);
-    const cos = newMath.cos;
-    newMath.cos = (x) => cos(newMath.multiply(x, newMath.pi) / 180);
-    const tan = newMath.tan;
-    newMath.tan = (x) => tan(newMath.multiply(x, newMath.pi) / 180);
-    const asin = newMath.asin;
-    newMath.asin = (x) => newMath.multiply(asin(x), 180) / newMath.pi;
-    const acos = newMath.acos;
-    newMath.acos = (x) => newMath.multiply(acos(x), 180) / newMath.pi;
-    const atan = newMath.atan;
-    newMath.atan = (x) => newMath.multiply(atan(x), 180) / newMath.pi;
-  }
-  math = newMath;
-};
-
-const formatResult = (result: any) => {
-    if (!math) return "Error";
-    try {
-        if (math.isComplex(result)) {
-            return result.toString();
-        }
-        return math.format(result, { notation: 'auto', precision: 15 });
-    } catch {
-        return "Error";
-    }
-};
-
 const initialState: CalculatorState = {
   expression: '',
   display: '0',
@@ -65,34 +27,67 @@ const initialState: CalculatorState = {
 
 export function useScientificCalculator() {
   const [state, setState] = useState<CalculatorState>(initialState);
+  const mathRef = useRef<MathJsStatic | null>(null);
+
+  const initializeMathJs = (angleMode: 'deg' | 'rad') => {
+    const newMath = create(all, {
+      number: 'BigNumber',
+      precision: 64,
+    });
+
+    if (angleMode === 'deg') {
+      const sin = newMath.sin;
+      newMath.sin = (x) => sin(newMath.multiply(x, newMath.pi) / 180);
+      const cos = newMath.cos;
+      newMath.cos = (x) => cos(newMath.multiply(x, newMath.pi) / 180);
+      const tan = newMath.tan;
+      newMath.tan = (x) => tan(newMath.multiply(x, newMath.pi) / 180);
+      const asin = newMath.asin;
+      newMath.asin = (x) => newMath.multiply(asin(x), 180) / newMath.pi;
+      const acos = newMath.acos;
+      newMath.acos = (x) => newMath.multiply(acos(x), 180) / newMath.pi;
+      const atan = newMath.atan;
+      newMath.atan = (x) => newMath.multiply(atan(x), 180) / newMath.pi;
+    }
+    mathRef.current = newMath;
+  };
+  
+  const formatResult = (result: any) => {
+    const math = mathRef.current;
+    if (!math) return "Error";
+    try {
+        if (math.isComplex(result)) {
+            return result.toString();
+        }
+        return math.format(result, { notation: 'auto', precision: 15 });
+    } catch {
+        return "Error";
+    }
+  };
 
   useEffect(() => {
-    // Load state from localStorage on initial render
     try {
       const savedState = localStorage.getItem('scientificCalculatorState');
       if (savedState) {
         const parsedState = JSON.parse(savedState);
-        initializeMathJs(parsedState.angleMode || 'deg');
         setState(parsedState);
+        initializeMathJs(parsedState.angleMode || 'deg');
       } else {
         initializeMathJs('deg');
       }
     } catch (error) {
-      // If parsing fails, start with a clean state
       initializeMathJs('deg');
       setState(initialState);
     }
   }, []);
 
   useEffect(() => {
-    // Save state to localStorage whenever it changes
     try {
       localStorage.setItem('scientificCalculatorState', JSON.stringify(state));
     } catch (error) {
       console.error("Could not save state to localStorage", error);
     }
   }, [state]);
-
 
   const setAngleMode = (mode: 'deg' | 'rad') => {
     initializeMathJs(mode);
@@ -132,6 +127,7 @@ export function useScientificCalculator() {
   };
 
   const calculate = () => {
+    const math = mathRef.current;
     if (state.expression === '' || !math) return;
     try {
       let evalExpression = state.expression.replace(/π/g, 'pi').replace(/√/g, 'sqrt');
@@ -184,8 +180,6 @@ export function useScientificCalculator() {
                 expression: negatedResult
             });
         } else {
-            // This is a simplified implementation. A more robust solution
-            // would involve parsing the expression to find the last number.
             if(state.display.startsWith('-')) {
                 updateState({
                     display: state.display.substring(1),
