@@ -1,6 +1,6 @@
 "use client";
 
-import { History, Sigma, Copy, Trash2, CornerUpLeft, Percent, Divide, X, Minus, Plus, Equal, Eraser, Binary, PlusSquare } from 'lucide-react';
+import { History, Copy, Trash2, CornerUpLeft, Percent, Divide, X, Minus, Plus, Equal, PlusSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { useScientificCalculator, type HistoryItem } from '@/hooks/use-scientific-calculator';
@@ -81,7 +81,7 @@ export function ScientificCalculator() {
   const accentButtonClass = `${buttonClass} bg-accent text-accent-foreground hover:bg-accent/90`;
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-card p-4 sm:p-6 rounded-2xl shadow-2xl space-y-4 border">
+    <div className="w-full max-w-2xl mx-auto bg-card p-4 sm:p-6 rounded-2xl shadow-2xl space-y-4 border">
       {/* Display */}
       <div className="relative bg-background/50 rounded-lg p-4 text-right overflow-hidden break-words min-h-[8rem] flex flex-col justify-end">
         <div className="absolute top-2 left-2 flex items-center gap-2 z-10">
@@ -110,59 +110,52 @@ export function ScientificCalculator() {
       </div>
       
       {/* Buttons */}
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-6 gap-2">
         {/* Row 1 */}
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('^2')}>x²</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('^')}>xʸ</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('sin(')}>sin</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('cos(')}>cos</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('tan(')}>tan</Button>
-        <Button className={secondaryButtonClass} onClick={() => inputFunction('^')}>xʸ</Button>
-        <Button className={accentButtonClass} onClick={clear}>C</Button>
-        <Button className={accentButtonClass} onClick={backspace}><CornerUpLeft /></Button>
         <Button className={primaryButtonClass} onClick={() => inputOperator('/')}><Divide /></Button>
         
         {/* Row 2 */}
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('sqrt(')}>√</Button>
+        <Button className={secondaryButtonClass} onClick={() => inputFunction('!')}>n!</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('asin(')}>sin⁻¹</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('acos(')}>cos⁻¹</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('atan(')}>tan⁻¹</Button>
-        <Button className={secondaryButtonClass} onClick={() => inputFunction('sqrt(')}>√</Button>
-        <Button className={buttonClass} onClick={() => inputDigit('7')}>7</Button>
-        <Button className={buttonClass} onClick={() => inputDigit('8')}>8</Button>
-        <Button className={buttonClass} onClick={() => inputDigit('9')}>9</Button>
+        <Button className={primaryButtonClass} onClick={() => inputOperator('*')}><X /></Button>
 
         {/* Row 3 */}
         <Button className={secondaryButtonClass} onClick={() => inputFunction('ln(')}>ln</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('log10(')}>log</Button>
-        <Button className={secondaryButtonClass} onClick={() => inputFunction('!')}>n!</Button>
-        <Button className={secondaryButtonClass} onClick={() => inputFunction('^2')}>x²</Button>
-        <Button className={buttonClass} onClick={() => inputDigit('4')}>4</Button>
-        <Button className={buttonClass} onClick={() => inputDigit('5')}>5</Button>
-        <Button className={buttonClass} onClick={() => inputDigit('6')}>6</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('7')}>7</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('8')}>8</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('9')}>9</Button>
+        <Button className={primaryButtonClass} onClick={() => inputOperator('-')}><Minus /></Button>
 
         {/* Row 4 */}
         <Button className={secondaryButtonClass} onClick={() => inputFunction('(')}>(</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction(')')}>)</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('4')}>4</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('5')}>5</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('6')}>6</Button>
+        <Button className={primaryButtonClass} onClick={() => inputOperator('+')}><Plus /></Button>
+
+        {/* Row 5 */}
         <Button className={secondaryButtonClass} onClick={() => inputFunction('E')}>e</Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('pi')}>π</Button>
         <Button className={buttonClass} onClick={() => inputDigit('1')}>1</Button>
         <Button className={buttonClass} onClick={() => inputDigit('2')}>2</Button>
         <Button className={buttonClass} onClick={() => inputDigit('3')}>3</Button>
+        <Button className={`${primaryButtonClass} row-span-2`} onClick={calculate}><Equal /></Button>
 
-        {/* Row 5 */}
-        <Button className={secondaryButtonClass} onClick={memoryClear}>MC</Button>
-        <Button className={secondaryButtonClass} onClick={memoryRecall}>MR</Button>
-        <Button className={secondaryButtonClass} onClick={memoryAdd}>M+</Button>
-        <Button className={secondaryButtonClass} onClick={memorySubtract}>M-</Button>
+        {/* Row 6 */}
+        <Button className={accentButtonClass} onClick={clear}>C</Button>
+        <Button className={accentButtonClass} onClick={backspace}><CornerUpLeft /></Button>
         <Button className={buttonClass} onClick={toggleSign}><PlusSquare /></Button>
-        <Button className={buttonClass} onClick={() => inputDigit('0')}>0</Button>
-        <Button className={buttonClass} onClick={() => inputDigit('.')}>.</Button>
-        
-        {/* Operators in last column */}
-        <div className="flex flex-col gap-2">
-            <Button className={primaryButtonClass} onClick={() => inputOperator('*')}><X /></Button>
-            <Button className={primaryButtonClass} onClick={() => inputOperator('-')}><Minus /></Button>
-            <Button className={primaryButtonClass} onClick={() => inputOperator('+')}><Plus /></Button>
-            <Button className={`${primaryButtonClass} flex-grow`} onClick={calculate}><Equal /></Button>
-        </div>
+        <Button className={`${buttonClass} col-span-2`} onClick={() => inputDigit('0')}>0</Button>
       </div>
     </div>
   );
