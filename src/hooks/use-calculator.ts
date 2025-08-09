@@ -40,6 +40,11 @@ export function useCalculator() {
     setOperator(null);
     setWaitingForSecondOperand(false);
   };
+
+  const backspace = () => {
+    if (waitingForSecondOperand) return;
+    setDisplayValue(displayValue.slice(0, -1) || '0');
+  };
   
   const handlePercent = () => {
     const currentValue = parseFloat(displayValue);
@@ -49,10 +54,8 @@ export function useCalculator() {
 
     let result;
     if (firstOperand !== null && operator) {
-      // If there's a pending operation, calculate percentage of the first operand
       result = (currentValue / 100) * firstOperand;
     } else {
-      // Otherwise, just divide the current value by 100
       result = currentValue / 100;
     }
     
@@ -136,5 +139,6 @@ export function useCalculator() {
     handleEquals,
     clearHistory,
     handlePercent,
+    backspace,
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { History, Percent } from 'lucide-react';
+import { History, Percent, CornerUpLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { useCalculator, type HistoryItem } from '@/hooks/use-calculator';
@@ -17,6 +17,7 @@ export function Calculator() {
     handleEquals,
     clearHistory,
     handlePercent,
+    backspace,
   } = useCalculator();
 
   const renderHistory = () => (
@@ -49,26 +50,29 @@ export function Calculator() {
       </div>
     )
   );
+  
+  const buttonClass = "text-xl sm:text-2xl h-16 sm:h-20 transition-transform duration-100 active:scale-95";
 
   const buttons = [
-    { label: 'AC', handler: clearInput, className: 'bg-accent text-accent-foreground hover:bg-accent/90' },
-    { label: '%', handler: handlePercent, className: 'bg-accent text-accent-foreground hover:bg-accent/90', icon: Percent },
-    { label: '÷', handler: () => handleOperator('/'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
-    { label: '×', handler: () => handleOperator('*'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
+    { label: 'AC', handler: clearInput, className: 'bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80' },
+    { label: '%', handler: handlePercent, className: 'bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80', icon: Percent },
+    { label: '⌫', handler: backspace, className: 'bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80', icon: CornerUpLeft },
+    { label: '÷', handler: () => handleOperator('/'), className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
     { label: '7', handler: () => inputDigit('7') },
     { label: '8', handler: () => inputDigit('8') },
     { label: '9', handler: () => inputDigit('9') },
-    { label: '−', handler: () => handleOperator('-'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
+    { label: '×', handler: () => handleOperator('*'), className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
     { label: '4', handler: () => inputDigit('4') },
     { label: '5', handler: () => inputDigit('5') },
     { label: '6', handler: () => inputDigit('6') },
-    { label: '+', handler: () => handleOperator('+'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
+    { label: '−', handler: () => handleOperator('-'), className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
     { label: '1', handler: () => inputDigit('1') },
     { label: '2', handler: () => inputDigit('2') },
     { label: '3', handler: () => inputDigit('3') },
-    { label: '=', handler: handleEquals, className: 'row-span-2 bg-primary text-primary-foreground hover:bg-primary/90' },
+    { label: '+', handler: () => handleOperator('+'), className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
     { label: '0', handler: () => inputDigit('0'), className: 'col-span-2' },
     { label: '.', handler: inputDecimal },
+    { label: '=', handler: handleEquals, className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
   ];
 
   return (
@@ -97,7 +101,7 @@ export function Calculator() {
           <Button
             key={btn.label}
             onClick={btn.handler}
-            className={`text-xl sm:text-2xl h-16 sm:h-20 transition-transform duration-100 active:scale-95 ${btn.className || 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
+            className={`${buttonClass} ${btn.className || 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70'}`}
           >
             {btn.icon ? <btn.icon /> : btn.label}
           </Button>
