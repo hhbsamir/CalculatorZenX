@@ -1,3 +1,4 @@
+
 "use client";
 
 import { History, Copy, Trash2, CornerUpLeft, Percent, Divide, X, Minus, Plus, Equal, PlusSquare } from 'lucide-react';
@@ -76,7 +77,7 @@ export function ScientificCalculator() {
   );
 
   const buttonClass = "text-lg sm:text-xl h-12 sm:h-14 transition-transform duration-100 active:scale-95 focus:z-10";
-  const primaryButtonClass = `${buttonClass} bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/30`;
+  const primaryButtonClass = `${buttonClass} bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80`;
   const secondaryButtonClass = `${buttonClass} bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70`;
   const accentButtonClass = `${buttonClass} bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80`;
 
