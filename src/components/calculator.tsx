@@ -1,6 +1,6 @@
 "use client";
 
-import { History } from 'lucide-react';
+import { History, Percent } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { useCalculator, type HistoryItem } from '@/hooks/use-calculator';
@@ -16,6 +16,7 @@ export function Calculator() {
     handleOperator,
     handleEquals,
     clearHistory,
+    handlePercent,
   } = useCalculator();
 
   const renderHistory = () => (
@@ -50,7 +51,8 @@ export function Calculator() {
   );
 
   const buttons = [
-    { label: 'AC', handler: clearInput, className: 'bg-accent text-accent-foreground hover:bg-accent/90 col-span-2' },
+    { label: 'AC', handler: clearInput, className: 'bg-accent text-accent-foreground hover:bg-accent/90' },
+    { label: '%', handler: handlePercent, className: 'bg-accent text-accent-foreground hover:bg-accent/90', icon: Percent },
     { label: '÷', handler: () => handleOperator('/'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
     { label: '×', handler: () => handleOperator('*'), className: 'bg-primary text-primary-foreground hover:bg-primary/90' },
     { label: '7', handler: () => inputDigit('7') },
@@ -97,7 +99,7 @@ export function Calculator() {
             onClick={btn.handler}
             className={`text-2xl h-16 sm:h-20 transition-transform duration-100 active:scale-95 ${btn.className || 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
           >
-            {btn.label}
+            {btn.icon ? <btn.icon /> : btn.label}
           </Button>
         ))}
       </div>

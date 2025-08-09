@@ -40,6 +40,16 @@ export function useCalculator() {
     setOperator(null);
     setWaitingForSecondOperand(false);
   };
+  
+  const handlePercent = () => {
+    const currentValue = parseFloat(displayValue);
+    if (isNaN(currentValue)) {
+      return;
+    }
+    const result = currentValue / 100;
+    const resultString = String(parseFloat(result.toPrecision(15)));
+    setDisplayValue(resultString);
+  };
 
   const performCalculation: { [key: string]: (a: number, b: number) => number } = {
     '/': (first, second) => first / second,
@@ -115,6 +125,7 @@ export function useCalculator() {
     clearInput,
     handleOperator,
     handleEquals,
-    clearHistory
+    clearHistory,
+    handlePercent,
   };
 }
