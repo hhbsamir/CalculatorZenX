@@ -200,10 +200,60 @@ export function useScientificCalculator() {
       updateState({
         display: percentValue.toString(),
         expression: percentValue.toString(),
-        isResult: true,
+        isResult: false, 
       });
-    } else {
-        handleInput('/100');
+      return;
+    }
+
+    if (state.expression) {
+      try {
+        if (!math) return;
+        // Find the last number and the preceding part of the expression
+        const parts = state.expression.match(/(.*[+\-*/(])?([0-9.]+)$/);
+        if (parts) {
+          const precedingExpression = parts[1] || '';
+          const lastNumber = parts[2];
+          
+          let baseValue = 1;
+          if (precedingExpression) {
+             // Evaluate the preceding part to get the base for the percentage
+             const sanitizedPreceding = precedingExpression.slice(0, -1).replace(/π/g, 'pi').replace(/√/g, 'sqrt');
+             if (sanitizedPreceding) {
+                baseValue = math.evaluate(sanitizedPreceding);
+             }
+          }
+          
+          const percentageValue = math.evaluate(`(${lastNumber}/100) * ${baseValue}`);
+          const newExpression = `${precedingExpression}${formatResult(percentageValue)}`;
+          
+          updateState({
+            expression: newExpression,
+            display: newExpression,
+            isResult: false,
+          });
+
+        } else {
+          // If regex fails, fallback to simple percentage
+          const percentValue = math.evaluate(`(${state.expression})/100`);
+          const formatted = formatResult(percentValue);
+          updateState({
+            expression: formatted,
+            display: formatted,
+            isResult: false,
+          });
+        }
+      } catch (e) {
+        // Fallback for safety if evaluation fails
+         const currentVal = parseFloat(state.display);
+         if(!isNaN(currentVal)){
+            const percentValue = currentVal / 100;
+            updateState({
+              display: percentValue.toString(),
+              expression: state.expression.replace(currentVal.toString(), percentValue.toString()),
+              isResult: false,
+            });
+         }
+      }
     }
   };
 
