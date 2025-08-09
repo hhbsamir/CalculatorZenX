@@ -9,6 +9,7 @@ export type HistoryItem = {
 
 export function useCalculator() {
   const [displayValue, setDisplayValue] = useState<string>('0');
+  const [fullExpression, setFullExpression] = useState<string>('');
   const [firstOperand, setFirstOperand] = useState<number | null>(null);
   const [operator, setOperator] = useState<string | null>(null);
   const [waitingForSecondOperand, setWaitingForSecondOperand] = useState<boolean>(false);
@@ -19,7 +20,8 @@ export function useCalculator() {
       setDisplayValue(digit);
       setWaitingForSecondOperand(false);
     } else {
-      setDisplayValue(displayValue === '0' ? digit : displayValue + digit);
+      const newDisplayValue = displayValue === '0' ? digit : displayValue + digit;
+      setDisplayValue(newDisplayValue);
     }
   };
 
@@ -39,11 +41,13 @@ export function useCalculator() {
     setFirstOperand(null);
     setOperator(null);
     setWaitingForSecondOperand(false);
+    setFullExpression('');
   };
 
   const backspace = () => {
     if (waitingForSecondOperand) return;
-    setDisplayValue(displayValue.slice(0, -1) || '0');
+    const newDisplayValue = displayValue.slice(0, -1) || '0';
+    setDisplayValue(newDisplayValue);
   };
   
   const handlePercent = () => {
@@ -72,11 +76,15 @@ export function useCalculator() {
 
   const handleOperator = (nextOperator: string) => {
     const inputValue = parseFloat(displayValue);
+    const operatorSymbol = nextOperator === '*' ? '×' : nextOperator === '/' ? '÷' : nextOperator;
 
     if (operator && waitingForSecondOperand) {
       setOperator(nextOperator);
+      setFullExpression(prev => prev.slice(0, -2) + ` ${operatorSymbol} `);
       return;
     }
+    
+    setFullExpression(prev => `${prev === '' ? '' : `${prev} `}${displayValue} ${operatorSymbol} `);
 
     if (firstOperand === null) {
       setFirstOperand(inputValue);
@@ -86,11 +94,13 @@ export function useCalculator() {
       setDisplayValue(resultString);
       setFirstOperand(result);
 
+      const expressionText = `${firstOperand} ${operatorSymbol} ${inputValue}`;
       const newHistoryItem: HistoryItem = {
-        expression: `${firstOperand} ${operator} ${inputValue}`,
+        expression: expressionText,
         result: resultString
       };
       setHistory(prev => [newHistoryItem, ...prev]);
+      setFullExpression(`${resultString} ${operatorSymbol} `);
     }
 
     setWaitingForSecondOperand(true);
@@ -101,28 +111,32 @@ export function useCalculator() {
     if (!operator || firstOperand === null) return;
 
     const secondOperand = parseFloat(displayValue);
+    const operatorSymbol = operator === '*' ? '×' : operator === '/' ? '÷' : operator;
     
     if (operator === '/' && secondOperand === 0) {
         setDisplayValue('Error');
         setFirstOperand(null);
         setOperator(null);
         setWaitingForSecondOperand(false);
+        setFullExpression('');
         return;
     }
     
     const result = performCalculation[operator](firstOperand, secondOperand);
     const resultString = String(parseFloat(result.toPrecision(15)));
     
+    const expressionText = `${fullExpression}${displayValue}`;
     const newHistoryItem: HistoryItem = {
-      expression: `${firstOperand} ${operator} ${secondOperand}`,
+      expression: expressionText,
       result: resultString
     };
     setHistory(prev => [newHistoryItem, ...prev]);
 
     setDisplayValue(resultString);
-    setFirstOperand(null); // Reset for new calculation
+    setFirstOperand(null);
     setOperator(null);
     setWaitingForSecondOperand(false);
+    setFullExpression('');
   };
 
   const clearHistory = () => {
@@ -131,6 +145,7 @@ export function useCalculator() {
 
   return {
     displayValue,
+    fullExpression,
     history,
     inputDigit,
     inputDecimal,

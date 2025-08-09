@@ -9,6 +9,7 @@ import { ScrollArea } from './ui/scroll-area';
 export function Calculator() {
   const {
     displayValue,
+    fullExpression,
     history,
     inputDigit,
     inputDecimal,
@@ -91,7 +92,8 @@ export function Calculator() {
                     {renderHistory()}
                 </SheetContent>
             </Sheet>
-            <div className="w-full bg-background/50 rounded-lg p-4 text-right overflow-hidden break-words">
+            <div className="w-full bg-background/50 rounded-lg p-4 text-right overflow-hidden break-words min-h-[6.5rem]">
+                <p className="text-muted-foreground h-6 text-lg">{fullExpression}</p>
                 <span className="text-4xl sm:text-5xl font-bold tracking-wider">{displayValue}</span>
             </div>
         </div>
