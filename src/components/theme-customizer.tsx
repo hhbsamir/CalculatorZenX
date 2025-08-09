@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useState, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,7 @@ export function ThemeCustomizer() {
   const [open, setOpen] = useState(false);
   const [initialState, setInitialState] = useState<{data?: PersonalizeCalculatorThemeOutput, error?: string}>({});
 
-  const [state, formAction] = useFormState(getNewTheme, initialState);
+  const [state, formAction] = useActionState(getNewTheme, initialState);
 
   useEffect(() => {
     if (state.error) {
