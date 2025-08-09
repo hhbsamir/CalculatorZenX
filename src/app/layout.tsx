@@ -25,20 +25,21 @@ export default function RootLayout({
         <SidebarProvider defaultOpen={false}>
             <AppSidebar />
             <SidebarInset>
-              <div className="absolute top-6 left-1/2 -translate-x-1/2 text-2xl font-bold text-foreground">
-                Calculator X
-              </div>
-              <main className="min-h-screen flex items-center justify-center p-4 relative">
-                <div className="absolute top-4 left-4 z-20 md:hidden">
-                  <SidebarTrigger />
-                </div>
-                <div className="absolute top-4 left-4 hidden md:block">
-                  <SidebarTrigger />
-                </div>
-                {children}
-              </main>
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-muted-foreground">
-                By Samir
+              <div className="relative flex flex-col min-h-screen">
+                <header className="py-4 text-center">
+                  <div className="text-2xl font-bold text-foreground">
+                    Calculator X
+                  </div>
+                </header>
+                <main className="flex-grow flex items-center justify-center p-4 relative">
+                  <div className="absolute top-4 left-4 z-20">
+                    <SidebarTrigger />
+                  </div>
+                  {children}
+                </main>
+                <footer className="py-4 text-center text-muted-foreground">
+                  By Samir
+                </footer>
               </div>
             </SidebarInset>
         </SidebarProvider>
