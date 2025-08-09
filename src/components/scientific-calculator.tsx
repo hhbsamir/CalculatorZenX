@@ -151,8 +151,9 @@ export function ScientificCalculator() {
         <Button className={secondaryButtonClass} onClick={toggleSign}><PlusSquare/></Button>
         <Button className={secondaryButtonClass} onClick={() => inputFunction('pi')}>π</Button>
         <Button className={secondaryButtonClass} onClick={inputPercent}><Percent /></Button>
-        <Button className={`${buttonClass} col-span-2`} onClick={() => inputDigit('0')}>0</Button>
+        <Button className={buttonClass} onClick={() => inputDigit('0')}>0</Button>
         <Button className={buttonClass} onClick={() => inputDigit('.')}>.</Button>
+        <Button className={primaryButtonClass} onClick={() => inputOperator('+')}><Plus /></Button>
         <Button className={primaryButtonClass} onClick={calculate}><Equal /></Button>
       </div>
     </div>
