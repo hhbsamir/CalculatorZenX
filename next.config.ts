@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  devServer: {
+    allowedHosts: ['localhost', '.cloudworkstations.dev'],
+  }
 };
 
 export default nextConfig;
