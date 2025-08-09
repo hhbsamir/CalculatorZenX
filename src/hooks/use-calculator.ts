@@ -46,7 +46,16 @@ export function useCalculator() {
     if (isNaN(currentValue)) {
       return;
     }
-    const result = currentValue / 100;
+
+    let result;
+    if (firstOperand !== null && operator) {
+      // If there's a pending operation, calculate percentage of the first operand
+      result = (currentValue / 100) * firstOperand;
+    } else {
+      // Otherwise, just divide the current value by 100
+      result = currentValue / 100;
+    }
+    
     const resultString = String(parseFloat(result.toPrecision(15)));
     setDisplayValue(resultString);
   };
