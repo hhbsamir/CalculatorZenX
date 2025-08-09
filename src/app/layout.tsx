@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -22,9 +22,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></link>
       </head>
       <body className="font-body antialiased">
-        <SidebarProvider>
+        <SidebarProvider defaultOpen={false}>
             <AppSidebar />
             <SidebarInset>
+              <div className="absolute top-4 left-4">
+                  <SidebarTrigger />
+              </div>
               <main className="min-h-screen flex items-center justify-center p-4">
                 {children}
               </main>
