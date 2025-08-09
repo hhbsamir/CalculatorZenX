@@ -18,8 +18,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  devServer: {
-    allowedHosts: ['localhost', '.cloudworkstations.dev'],
+  experimental: {
+    allowedDevOrigins: ["**/*.cloudworkstations.dev"],
   }
 };
 
