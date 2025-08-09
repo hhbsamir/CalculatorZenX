@@ -25,10 +25,10 @@ export default function RootLayout({
         <SidebarProvider defaultOpen={false}>
             <AppSidebar />
             <SidebarInset>
-              <div className="absolute top-4 left-4">
+              <main className="min-h-screen flex items-center justify-center p-4 relative">
+                <div className="absolute top-4 left-4">
                   <SidebarTrigger />
-              </div>
-              <main className="min-h-screen flex items-center justify-center p-4">
+                </div>
                 {children}
               </main>
             </SidebarInset>
