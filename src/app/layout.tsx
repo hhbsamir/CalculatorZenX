@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -32,8 +32,11 @@ export default function RootLayout({
                   </div>
                 </header>
                 <main className="flex-grow flex items-center justify-center p-4 relative">
-                  <div className="absolute top-4 left-4 z-20">
+                  <div className="absolute top-4 left-4 z-20 md:hidden">
                     <SidebarTrigger />
+                  </div>
+                  <div className="absolute top-4 left-4 hidden md:block">
+                     <SidebarTrigger />
                   </div>
                   {children}
                 </main>
