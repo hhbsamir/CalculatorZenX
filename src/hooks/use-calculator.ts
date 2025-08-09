@@ -67,6 +67,16 @@ export function useCalculator() {
     setDisplayValue(resultString);
   };
 
+  const toggleSign = () => {
+    if (displayValue !== '0') {
+      setDisplayValue(
+        displayValue.startsWith('-')
+          ? displayValue.substring(1)
+          : `-${displayValue}`
+      );
+    }
+  };
+
   const performCalculation: { [key: string]: (a: number, b: number) => number } = {
     '/': (first, second) => first / second,
     '*': (first, second) => first * second,
@@ -84,7 +94,7 @@ export function useCalculator() {
       return;
     }
     
-    setFullExpression(prev => `${prev === '' ? '' : `${prev} `}${displayValue} ${operatorSymbol} `);
+    setFullExpression(prev => `${prev === '' ? (firstOperand !== null ? firstOperand : '') : `${prev} `}${displayValue} ${operatorSymbol} `);
 
     if (firstOperand === null) {
       setFirstOperand(inputValue);
@@ -94,7 +104,7 @@ export function useCalculator() {
       setDisplayValue(resultString);
       setFirstOperand(result);
 
-      const expressionText = `${firstOperand} ${operatorSymbol} ${inputValue}`;
+      const expressionText = `${fullExpression}${displayValue}`;
       const newHistoryItem: HistoryItem = {
         expression: expressionText,
         result: resultString
@@ -155,5 +165,6 @@ export function useCalculator() {
     clearHistory,
     handlePercent,
     backspace,
+    toggleSign,
   };
 }

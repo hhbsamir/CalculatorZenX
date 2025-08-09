@@ -1,7 +1,7 @@
 
 "use client";
 
-import { History } from 'lucide-react';
+import { CornerUpLeft, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { useCalculator, type HistoryItem } from '@/hooks/use-calculator';
@@ -20,6 +20,7 @@ export function Calculator() {
     clearHistory,
     handlePercent,
     backspace,
+    toggleSign,
   } = useCalculator();
 
   const renderHistory = () => (
@@ -53,46 +54,54 @@ export function Calculator() {
     )
   );
   
-  const buttonClass = "text-3xl sm:text-4xl h-20 w-20 sm:h-24 sm:w-24 rounded-full transition-transform duration-100 active:scale-95";
+  const buttonClass = "text-xl sm:text-2xl h-16 w-full rounded-lg transition-transform duration-100 active:scale-95";
+  const primaryButtonClass = `${buttonClass} bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80`;
+  const secondaryButtonClass = `${buttonClass} bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70`;
+  const accentButtonClass = `${buttonClass} bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80`;
 
   const buttons = [
-    { label: 'AC', handler: clearInput, className: 'bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80' },
-    { label: '+/-', handler: () => {}, className: 'bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80' },
-    { label: '%', handler: handlePercent, className: 'bg-accent text-accent-foreground hover:bg-accent/90 active:bg-accent/80' },
-    { label: '÷', handler: () => handleOperator('/'), className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
-    { label: '7', handler: () => inputDigit('7'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '8', handler: () => inputDigit('8'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '9', handler: () => inputDigit('9'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '×', handler: () => handleOperator('*'), className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
-    { label: '4', handler: () => inputDigit('4'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '5', handler: () => inputDigit('5'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '6', handler: () => inputDigit('6'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '−', handler: () => handleOperator('-'), className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
-    { label: '1', handler: () => inputDigit('1'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '2', handler: () => inputDigit('2'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '3', handler: () => inputDigit('3'), className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '+', handler: () => handleOperator('+'), className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
-    { label: '0', handler: () => inputDigit('0'), className: 'col-span-2 w-auto', customClass: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '.', handler: inputDecimal, className: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70' },
-    { label: '=', handler: handleEquals, className: 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80' },
+    { label: 'AC', handler: clearInput, className: accentButtonClass },
+    { label: '+/-', handler: toggleSign, className: accentButtonClass },
+    { label: '%', handler: handlePercent, className: accentButtonClass },
+    { label: '÷', handler: () => handleOperator('/'), className: primaryButtonClass },
+    { label: '7', handler: () => inputDigit('7'), className: secondaryButtonClass },
+    { label: '8', handler: () => inputDigit('8'), className: secondaryButtonClass },
+    { label: '9', handler: () => inputDigit('9'), className: secondaryButtonClass },
+    { label: '×', handler: () => handleOperator('*'), className: primaryButtonClass },
+    { label: '4', handler: () => inputDigit('4'), className: secondaryButtonClass },
+    { label: '5', handler: () => inputDigit('5'), className: secondaryButtonClass },
+    { label: '6', handler: () => inputDigit('6'), className: secondaryButtonClass },
+    { label: '−', handler: () => handleOperator('-'), className: primaryButtonClass },
+    { label: '1', handler: () => inputDigit('1'), className: secondaryButtonClass },
+    { label: '2', handler: () => inputDigit('2'), className: secondaryButtonClass },
+    { label: '3', handler: () => inputDigit('3'), className: secondaryButtonClass },
+    { label: '+', handler: () => handleOperator('+'), className: primaryButtonClass },
+    { label: '0', handler: () => inputDigit('0'), customClass: `${secondaryButtonClass} col-span-2` },
+    { label: '.', handler: inputDecimal, className: secondaryButtonClass },
+    { label: '=', handler: handleEquals, className: primaryButtonClass },
   ];
 
   return (
     <div className="w-full max-w-sm mx-auto bg-card p-4 sm:p-6 rounded-2xl space-y-4">
         <div className="relative">
-            <Sheet>
-                <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="absolute top-0 left-0 text-muted-foreground hover:text-primary">
-                        <History className="h-5 w-5" />
-                    </Button>
-                </SheetTrigger>
-                <SheetContent>
-                    <SheetHeader>
-                        <SheetTitle>Calculation History</SheetTitle>
-                    </SheetHeader>
-                    {renderHistory()}
-                </SheetContent>
-            </Sheet>
+            <div className="flex justify-between items-center mb-2">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                            <History className="h-5 w-5" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                        <SheetHeader>
+                            <SheetTitle>Calculation History</SheetTitle>
+                        </SheetHeader>
+                        {renderHistory()}
+                    </SheetContent>
+                </Sheet>
+                 <Button variant="ghost" size="icon" onClick={backspace} className="text-muted-foreground hover:text-primary">
+                    <CornerUpLeft className="h-5 w-5" />
+                </Button>
+            </div>
             <div className="w-full bg-transparent rounded-lg p-4 text-right overflow-hidden break-words min-h-[6.5rem] flex flex-col justify-end">
                 <p className="text-muted-foreground h-6 text-2xl">{fullExpression}</p>
                 <span className="text-6xl sm:text-7xl font-light tracking-wider">{displayValue}</span>
@@ -104,7 +113,7 @@ export function Calculator() {
           <Button
             key={btn.label}
             onClick={btn.handler}
-            className={`${buttonClass} ${btn.className || ''} ${btn.customClass || ''}`}
+            className={`${btn.className || ''} ${btn.customClass || ''}`}
           >
             {btn.icon ? <btn.icon /> : btn.label}
           </Button>
