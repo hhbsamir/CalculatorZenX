@@ -25,11 +25,9 @@ const initialState: CalculatorState = {
   memory: 0,
 };
 
-export function useScientificCalculator() {
-  const [state, setState] = useState<CalculatorState>(initialState);
-  const mathRef = useRef<MathJsStatic | null>(null);
+let math: MathJsStatic | null = null;
 
-  const initializeMathJs = (angleMode: 'deg' | 'rad') => {
+const initializeMathJs = (angleMode: 'deg' | 'rad') => {
     const newMath = create(all, {
       number: 'BigNumber',
       precision: 64,
@@ -49,11 +47,13 @@ export function useScientificCalculator() {
       const atan = newMath.atan;
       newMath.atan = (x) => newMath.multiply(atan(x), 180) / newMath.pi;
     }
-    mathRef.current = newMath;
+    math = newMath;
   };
+
+export function useScientificCalculator() {
+  const [state, setState] = useState<CalculatorState>(initialState);
   
   const formatResult = (result: any) => {
-    const math = mathRef.current;
     if (!math) return "Error";
     try {
         if (math.isComplex(result)) {
@@ -127,7 +127,6 @@ export function useScientificCalculator() {
   };
 
   const calculate = () => {
-    const math = mathRef.current;
     if (state.expression === '' || !math) return;
     try {
       let evalExpression = state.expression.replace(/π/g, 'pi').replace(/√/g, 'sqrt');

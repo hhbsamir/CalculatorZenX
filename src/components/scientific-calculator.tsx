@@ -1,6 +1,6 @@
 "use client";
 
-import { History, Sigma, Copy, Trash2, Pilcrow, CornerUpLeft, PlusMinus, Percent, Divide, X, Minus, Plus, Equal, Eraser } from 'lucide-react';
+import { History, Sigma, Copy, Trash2, CornerUpLeft, Percent, Divide, X, Minus, Plus, Equal, Eraser, Binary, PlusSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from '@/components/ui/sheet';
 import { useScientificCalculator, type HistoryItem } from '@/hooks/use-scientific-calculator';
@@ -152,7 +152,7 @@ export function ScientificCalculator() {
         <Button className={secondaryButtonClass} onClick={memoryRecall}>MR</Button>
         <Button className={secondaryButtonClass} onClick={memoryAdd}>M+</Button>
         <Button className={secondaryButtonClass} onClick={memorySubtract}>M-</Button>
-        <Button className={buttonClass} onClick={toggleSign}><PlusMinus /></Button>
+        <Button className={buttonClass} onClick={toggleSign}><PlusSquare /></Button>
         <Button className={buttonClass} onClick={() => inputDigit('0')}>0</Button>
         <Button className={buttonClass} onClick={() => inputDigit('.')}>.</Button>
         
