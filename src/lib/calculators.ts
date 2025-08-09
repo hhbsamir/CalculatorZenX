@@ -52,6 +52,7 @@ export const calculatorCategories: CalculatorCategory[] = [
   {
     name: "General",
     calculators: [
+      { name: "Age Calculator", slug: "age-calculator", icon: User, description: "Calculate age from a birth date." },
       { name: "Standard Calculator", slug: "/", icon: Calculator, description: "For basic arithmetic operations." },
       { name: "Percentage Calculator", slug: "percentage-calculator", icon: CirclePercent, description: "Calculate percentages of numbers." },
       { name: "Conversion Calculator", slug: "conversion-calculator", icon: Combine, description: "Convert between different units." },
@@ -105,7 +106,6 @@ export const calculatorCategories: CalculatorCategory[] = [
   {
     name: "Date & Time",
     calculators: [
-      { name: "Age Calculator", slug: "age-calculator", icon: User, description: "Calculate age from a birth date." },
       { name: "Date Calculator", slug: "date-calculator", icon: CalendarDays, description: "Add or subtract days from a date." },
       { name: "Time Calculator", slug: "time-calculator", icon: Clock, description: "Add, subtract, and convert time units." },
       { name: "Hours Calculator", slug: "hours-calculator", icon: Clock, description: "Calculate hours between two times." },
