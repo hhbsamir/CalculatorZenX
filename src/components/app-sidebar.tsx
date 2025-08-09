@@ -11,11 +11,8 @@ import {
   SidebarMenuButton,
   SidebarGroup,
   SidebarGroupLabel,
-  SidebarSeparator,
-  SidebarFooter
 } from "@/components/ui/sidebar";
 import { calculatorCategories } from "@/lib/calculators";
-import { ThemeCustomizer } from "./theme-customizer";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -53,10 +50,6 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarSeparator />
-        <ThemeCustomizer />
-      </SidebarFooter>
     </Sidebar>
   );
 }
