@@ -3,6 +3,8 @@ import {
   Calculator,
   User,
   FlaskConical,
+  FileText,
+  FileJson,
 } from "lucide-react";
 
 export interface CalculatorInfo {
@@ -26,6 +28,13 @@ export const calculatorCategories: CalculatorCategory[] = [
       { name: "Age Calculator", slug: "age-calculator", icon: User, description: "Calculate age from a birth date." },
     ],
   },
+  {
+    name: "New",
+    calculators: [
+      { name: "a", slug: "a", icon: FileText, description: "This is page a." },
+      { name: "b", slug: "b", icon: FileJson, description: "This is page b." },
+    ]
+  }
 ];
 
 export const allCalculators = calculatorCategories.flatMap(category => category.calculators);

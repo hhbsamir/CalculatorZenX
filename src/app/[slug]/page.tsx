@@ -9,7 +9,7 @@ type Props = {
 };
 
 export function generateStaticParams() {
-  return allCalculators.filter(c => c.slug !== '/').map((calc) => ({
+  return allCalculators.filter(c => c.slug !== '/' && c.slug !== 'scientific-calculator' && c.slug !== 'age-calculator').map((calc) => ({
     slug: calc.slug,
   }));
 }
