@@ -4,7 +4,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { History, Trash2, User } from "lucide-react";
+import { History, Trash2, User, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface SavedExperience {
   name: string;
@@ -36,6 +38,22 @@ export function ExperienceHistory() {
     }
   }
 
+  const downloadPdf = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Saved Work Experiences", 14, 22);
+    
+    autoTable(doc, {
+      startY: 30,
+      head: [['Name', 'Years', 'Months', 'Days']],
+      body: savedExperiences.map(exp => [exp.name, exp.years, exp.months, exp.days]),
+      headStyles: { fillColor: [24, 96, 53] }, // Primary color
+      styles: { cellPadding: 3, fontSize: 10 },
+    });
+
+    doc.save('experience_history.pdf');
+  };
+
   return (
     <Card className="w-full max-w-3xl">
       <CardHeader className="text-center">
@@ -51,7 +69,11 @@ export function ExperienceHistory() {
       <CardContent>
           {savedExperiences.length > 0 ? (
             <>
-                <div className="flex justify-end mb-4">
+                <div className="flex justify-end gap-2 mb-4">
+                    <Button variant="outline" size="sm" onClick={downloadPdf}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download PDF
+                    </Button>
                     <Button variant="outline" size="sm" onClick={clearSavedExperiences}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Clear History
