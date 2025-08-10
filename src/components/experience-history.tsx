@@ -73,18 +73,68 @@ export function ExperienceHistory() {
   const downloadPdf = async () => {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("Saved Work Experiences", 14, 22);
-    
-    autoTable(doc, {
-      startY: 30,
-      head: [['Name', 'Years', 'Months', 'Days']],
-      body: savedExperiences.map(exp => [exp.name, exp.years, exp.months, exp.days]),
-      headStyles: { fillColor: [24, 96, 53] }, // Primary color
-      styles: { cellPadding: 3, fontSize: 10 },
+
+    // Set document properties
+    doc.setProperties({
+        title: 'Work Experience Report',
+        subject: 'A detailed list of saved work experiences.',
+        author: 'CalcuZen',
     });
 
-    doc.save('experience_history.pdf');
+    // Header
+    const header = (data: any) => {
+      doc.setFontSize(20);
+      doc.setTextColor(40);
+      doc.setFont('helvetica', 'normal');
+      doc.text("Work Experience Report", data.settings.margin.left, 22);
+    };
+
+    // Footer
+    const footer = (data: any) => {
+      const pageCount = doc.internal.getNumberOfPages();
+      doc.setFontSize(10);
+      doc.setTextColor(150);
+      const date = new Date().toLocaleDateString();
+      doc.text( `Generated on ${date}`, data.settings.margin.left, doc.internal.pageSize.getHeight() - 10);
+      doc.text( `Page ${data.pageNumber} of ${pageCount}`, doc.internal.pageSize.getWidth() - data.settings.margin.right, doc.internal.pageSize.getHeight() - 10, { align: 'right' });
+    };
+
+    autoTable(doc, {
+      didDrawPage: (data) => {
+          header(data);
+          footer(data);
+      },
+      startY: 30,
+      head: [['#', 'Name', 'Years', 'Months', 'Days']],
+      body: savedExperiences.map((exp, index) => [
+          index + 1,
+          exp.name, 
+          exp.years, 
+          `${exp.months} month${exp.months === 1 ? '' : 's'}`, 
+          `${exp.days} day${exp.days === 1 ? '' : 's'}`
+      ]),
+      headStyles: { 
+        fillColor: [24, 96, 53], // Primary color
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 240]
+      },
+      styles: { cellPadding: 3, fontSize: 10, valign: 'middle' },
+      tableWidth: 'auto',
+      columnStyles: {
+        0: { cellWidth: 10 },
+        1: { cellWidth: 'auto' },
+      }
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY || 40;
+    doc.setFontSize(12);
+    doc.text(`Total Records: ${savedExperiences.length}`, 14, finalY + 15);
+
+
+    doc.save(`Work_Experience_Report_${new Date().toISOString().split('T')[0]}.pdf`);
   };
   
   const renderContent = () => {
@@ -116,17 +166,17 @@ export function ExperienceHistory() {
       return (
         <>
             <div className="flex justify-end gap-2 mb-4">
-                <Button variant="outline" size="sm" onClick={downloadPdf}>
+                <Button variant="outline" size="sm" onClick={downloadPdf} disabled={savedExperiences.length === 0}>
                     <Download className="mr-2 h-4 w-4" />
                     Download PDF
                 </Button>
-                <Button variant="outline" size="sm" onClick={clearSavedExperiences}>
+                <Button variant="outline" size="sm" onClick={clearSavedExperiences} disabled={savedExperiences.length === 0}>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Clear History
                 </Button>
             </div>
             <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                {savedExperiences.map((exp, index) => (
+                {savedExperiences.map((exp) => (
                 <div key={exp.id} className="p-4 bg-secondary rounded-lg flex items-center justify-between">
                     <div>
                         <p className="text-lg font-bold text-secondary-foreground flex items-center gap-2">
