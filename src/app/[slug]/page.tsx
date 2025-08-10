@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ExperienceCalculator } from '@/components/experience-calculator';
+import { ExperienceHistory } from '@/components/experience-history';
 
 type Props = {
   params: { slug: string };
@@ -18,6 +19,10 @@ export function generateStaticParams() {
 export default function CalculatorPage({ params }: Props) {
   if (params.slug === 'a') {
     return <ExperienceCalculator />;
+  }
+
+  if (params.slug === 'b') {
+    return <ExperienceHistory />;
   }
   
   const calculator = allCalculators.find((calc) => calc.slug === params.slug);
