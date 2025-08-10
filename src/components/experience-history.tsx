@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { History, Trash2, User, Download } from "lucide-react";
-import jsPDF from "jspdf";
+import type jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 interface SavedExperience {
@@ -38,7 +38,8 @@ export function ExperienceHistory() {
     }
   }
 
-  const downloadPdf = () => {
+  const downloadPdf = async () => {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF();
     doc.setFontSize(18);
     doc.text("Saved Work Experiences", 14, 22);
