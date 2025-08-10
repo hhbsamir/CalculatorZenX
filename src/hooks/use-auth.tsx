@@ -5,8 +5,9 @@ import { useState, useEffect, createContext, useContext, ReactNode } from "react
 import {
   getAuth,
   onAuthStateChanged,
-  signInWithPopup,
-  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
   signOut as firebaseSignOut,
   User,
 } from "firebase/auth";
@@ -15,7 +16,8 @@ import { app } from "@/lib/firebase";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, pass: string) => Promise<void>;
+  signUpWithEmail: (email: string, pass: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -35,12 +37,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, [auth]);
 
-  const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
+  const signInWithEmail = async (email: string, pass: string) => {
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithEmailAndPassword(auth, email, pass);
     } catch (error) {
-      console.error("Error signing in with Google", error);
+      console.error("Error signing in with email", error);
+      throw error;
+    }
+  };
+
+  const signUpWithEmail = async (email: string, pass: string, name: string) => {
+     try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      if(userCredential.user) {
+        await updateProfile(userCredential.user, {
+            displayName: name,
+        });
+      }
+      // Manually trigger a user state update
+      setUser(auth.currentUser);
+    } catch (error) {
+      console.error("Error signing up with email", error);
+      throw error;
     }
   };
 
@@ -53,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithEmail, signUpWithEmail, signOut }}>
       {children}
     </AuthContext.Provider>
   );
