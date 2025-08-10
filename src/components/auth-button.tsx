@@ -35,7 +35,7 @@ export function AuthButton() {
   return (
     <Button onClick={signInWithGoogle} className="w-full">
       <LogIn className="mr-2 h-5 w-5" />
-      Sign In with Google
+      Sign in
     </Button>
   );
 }
