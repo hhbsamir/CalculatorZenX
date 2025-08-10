@@ -1,13 +1,14 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Calendar as CalendarIcon, Plus, Trash2, Briefcase } from "lucide-react";
-import { differenceInDays, differenceInMonths, differenceInYears, parseISO } from 'date-fns';
+import { Calendar as CalendarIcon, Plus, Trash2, Briefcase, Save, History } from "lucide-react";
+import { differenceInDays, parseISO } from 'date-fns';
+import { Separator } from "./ui/separator";
 
 interface WorkPeriod {
   id: number;
@@ -24,11 +25,32 @@ interface TotalExperience {
 export function ExperienceCalculator() {
   const [workPeriods, setWorkPeriods] = useState<WorkPeriod[]>([{ id: 1, from: "", to: "" }]);
   const [totalExperience, setTotalExperience] = useState<TotalExperience | null>(null);
+  const [savedExperiences, setSavedExperiences] = useState<TotalExperience[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const storedExperiences = localStorage.getItem('dairyExperience');
+      if (storedExperiences) {
+        setSavedExperiences(JSON.parse(storedExperiences));
+      }
+    } catch (error) {
+      console.error("Failed to load experiences from localStorage", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('dairyExperience', JSON.stringify(savedExperiences));
+    } catch (error) {
+      console.error("Failed to save experiences to localStorage", error);
+    }
+  }, [savedExperiences]);
 
   const handlePeriodChange = (id: number, field: 'from' | 'to', value: string) => {
     const newPeriods = workPeriods.map(p => p.id === id ? { ...p, [field]: value } : p);
     setWorkPeriods(newPeriods);
+    setTotalExperience(null);
   };
 
   const addPeriod = () => {
@@ -44,11 +66,11 @@ export function ExperienceCalculator() {
   const calculateTotalExperience = () => {
     let totalDays = 0;
     setError(null);
+    setTotalExperience(null);
 
     for (const period of workPeriods) {
       if (!period.from || !period.to) {
         setError("Please fill in all 'From' and 'To' dates.");
-        setTotalExperience(null);
         return;
       }
 
@@ -57,13 +79,11 @@ export function ExperienceCalculator() {
 
       if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
         setError("Invalid date format. Please use YYYY-MM-DD.");
-        setTotalExperience(null);
         return;
       }
       
       if (fromDate > toDate) {
         setError("'From Date' cannot be after 'To Date' in any period.");
-        setTotalExperience(null);
         return;
       }
       
@@ -86,10 +106,18 @@ export function ExperienceCalculator() {
         }
 
         setTotalExperience({ years, months, days });
-    } else {
-        setTotalExperience(null);
     }
   };
+
+  const saveExperience = () => {
+    if (totalExperience) {
+      setSavedExperiences([totalExperience, ...savedExperiences]);
+    }
+  };
+
+  const clearSavedExperiences = () => {
+    setSavedExperiences([]);
+  }
 
   return (
     <Card className="w-full max-w-3xl">
@@ -142,14 +170,39 @@ export function ExperienceCalculator() {
         {error && <p className="text-destructive text-center font-medium">{error}</p>}
       </CardContent>
       {totalExperience && (
-        <CardFooter className="flex-col pt-6 border-t">
-           <div className="text-center">
+        <CardFooter className="flex-col pt-6 border-t space-y-4">
+           <div className="text-center w-full">
                 <p className="text-muted-foreground text-lg font-medium">Total Calculated Experience</p>
                 <p className="text-5xl font-bold text-primary">
                     {totalExperience.years} <span className="text-3xl font-medium text-foreground">years</span>, {totalExperience.months} <span className="text-3xl font-medium text-foreground">months</span>, {totalExperience.days} <span className="text-3xl font-medium text-foreground">days</span>
                 </p>
             </div>
+            <Button onClick={saveExperience} className="w-full sm:w-auto">
+                <Save className="mr-2 h-5 w-5" />
+                Save Experience
+            </Button>
         </CardFooter>
+      )}
+
+      {savedExperiences.length > 0 && (
+        <CardContent className="pt-6 border-t">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold flex items-center gap-2"><History className="h-6 w-6"/> Saved Experiences</h3>
+            <Button variant="outline" size="sm" onClick={clearSavedExperiences}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Clear History
+            </Button>
+          </div>
+          <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
+            {savedExperiences.map((exp, index) => (
+              <div key={index} className="p-4 bg-secondary rounded-lg">
+                  <p className="text-lg font-medium text-secondary-foreground">
+                    {exp.years} years, {exp.months} months, {exp.days} days
+                  </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
       )}
     </Card>
   );
