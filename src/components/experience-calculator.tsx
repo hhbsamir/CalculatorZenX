@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Calendar as CalendarIcon, Plus, Trash2, Briefcase, Save } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Trash2, Briefcase, Save, User } from "lucide-react";
 import { differenceInDays, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,8 +22,13 @@ interface TotalExperience {
   days: number;
 }
 
+interface SavedExperience extends TotalExperience {
+    name: string;
+}
+
 export function ExperienceCalculator() {
   const { toast } = useToast();
+  const [personName, setPersonName] = useState<string>("");
   const [workPeriods, setWorkPeriods] = useState<WorkPeriod[]>([{ id: 1, from: "", to: "" }]);
   const [totalExperience, setTotalExperience] = useState<TotalExperience | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -91,15 +96,24 @@ export function ExperienceCalculator() {
   };
 
   const saveExperience = () => {
+    if (!personName.trim()) {
+        toast({
+            title: "Name required",
+            description: "Please enter the person's name.",
+            variant: "destructive",
+        });
+        return;
+    }
     if (totalExperience) {
       try {
         const storedExperiences = localStorage.getItem('dairyExperience');
         const savedExperiences = storedExperiences ? JSON.parse(storedExperiences) : [];
-        const newSavedExperiences = [totalExperience, ...savedExperiences];
+        const newSavedExperience: SavedExperience = { name: personName, ...totalExperience };
+        const newSavedExperiences = [newSavedExperience, ...savedExperiences];
         localStorage.setItem('dairyExperience', JSON.stringify(newSavedExperiences));
         toast({
             title: "Experience Saved!",
-            description: "View saved experiences in tab 'b'.",
+            description: `Experience for ${personName} saved. View saved experiences in tab 'b'.`,
         });
       } catch (error) {
         console.error("Failed to save experience to localStorage", error);
@@ -124,6 +138,20 @@ export function ExperienceCalculator() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="grid gap-1.5">
+            <Label htmlFor="person-name">Person's Name</Label>
+            <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    id="person-name"
+                    type="text"
+                    placeholder="Enter name"
+                    value={personName}
+                    onChange={(e) => setPersonName(e.target.value)}
+                    className="h-12 text-lg pl-10"
+                />
+            </div>
+        </div>
         {workPeriods.map((period, index) => (
           <div key={period.id} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end relative">
             <div className="grid gap-1.5">

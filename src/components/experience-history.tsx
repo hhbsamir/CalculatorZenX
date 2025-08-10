@@ -4,16 +4,17 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { History, Trash2 } from "lucide-react";
+import { History, Trash2, User } from "lucide-react";
 
-interface TotalExperience {
+interface SavedExperience {
+  name: string;
   years: number;
   months: number;
   days: number;
 }
 
 export function ExperienceHistory() {
-  const [savedExperiences, setSavedExperiences] = useState<TotalExperience[]>([]);
+  const [savedExperiences, setSavedExperiences] = useState<SavedExperience[]>([]);
 
   useEffect(() => {
     try {
@@ -58,10 +59,16 @@ export function ExperienceHistory() {
                 </div>
                 <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                     {savedExperiences.map((exp, index) => (
-                    <div key={index} className="p-4 bg-secondary rounded-lg">
-                        <p className="text-lg font-medium text-secondary-foreground">
-                            {exp.years} years, {exp.months} months, {exp.days} days
-                        </p>
+                    <div key={index} className="p-4 bg-secondary rounded-lg flex items-center justify-between">
+                        <div>
+                            <p className="text-lg font-bold text-secondary-foreground flex items-center gap-2">
+                                <User className="h-5 w-5" />
+                                {exp.name}
+                            </p>
+                            <p className="text-md text-secondary-foreground/80">
+                                {exp.years} years, {exp.months} months, {exp.days} days
+                            </p>
+                        </div>
                     </div>
                     ))}
                 </div>
