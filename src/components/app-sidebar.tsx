@@ -11,8 +11,10 @@ import {
   SidebarMenuButton,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { calculatorCategories } from "@/lib/calculators";
+import { AuthButton } from "./auth-button";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -35,7 +37,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {category.calculators.map((calc) => (
                 <SidebarMenuItem key={calc.slug}>
-                  <Link href={calc.slug} className="w-full">
+                  <Link href={calc.slug} className="w-full" tabIndex={-1}>
                     <SidebarMenuButton
                       isActive={pathname === calc.slug}
                       tooltip={{ children: calc.name, side: "right" }}
@@ -50,6 +52,9 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
+       <SidebarFooter>
+          <AuthButton />
+        </SidebarFooter>
     </Sidebar>
   );
 }

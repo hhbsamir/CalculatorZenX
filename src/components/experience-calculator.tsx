@@ -1,14 +1,17 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Calendar as CalendarIcon, Plus, Trash2, Briefcase, Save, User } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Trash2, Briefcase, Save, User, ShieldAlert } from "lucide-react";
 import { differenceInDays, parseISO } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 interface WorkPeriod {
   id: number;
@@ -22,16 +25,15 @@ interface TotalExperience {
   days: number;
 }
 
-interface SavedExperience extends TotalExperience {
-    name: string;
-}
-
 export function ExperienceCalculator() {
   const { toast } = useToast();
+  const { user, loading } = useAuth();
+
   const [personName, setPersonName] = useState<string>("");
   const [workPeriods, setWorkPeriods] = useState<WorkPeriod[]>([{ id: 1, from: "", to: "" }]);
   const [totalExperience, setTotalExperience] = useState<TotalExperience | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handlePeriodChange = (id: number, field: 'from' | 'to', value: string) => {
     const newPeriods = workPeriods.map(p => p.id === id ? { ...p, [field]: value } : p);
@@ -95,7 +97,15 @@ export function ExperienceCalculator() {
     }
   };
 
-  const saveExperience = () => {
+  const saveExperience = async () => {
+    if (!user) {
+        toast({
+            title: "Authentication Required",
+            description: "You must be signed in to save an experience.",
+            variant: "destructive",
+        });
+        return;
+    }
     if (!personName.trim()) {
         toast({
             title: "Name required",
@@ -105,26 +115,58 @@ export function ExperienceCalculator() {
         return;
     }
     if (totalExperience) {
+      setIsSaving(true);
       try {
-        const storedExperiences = localStorage.getItem('dairyExperience');
-        const savedExperiences = storedExperiences ? JSON.parse(storedExperiences) : [];
-        const newSavedExperience: SavedExperience = { name: personName, ...totalExperience };
-        const newSavedExperiences = [newSavedExperience, ...savedExperiences];
-        localStorage.setItem('dairyExperience', JSON.stringify(newSavedExperiences));
+        await addDoc(collection(db, `users/${user.uid}/experiences`), {
+            name: personName,
+            ...totalExperience,
+            createdAt: serverTimestamp()
+        });
         toast({
             title: "Experience Saved!",
             description: `Experience for ${personName} saved. View saved experiences in tab 'b'.`,
         });
+        setPersonName("");
+        setWorkPeriods([{ id: 1, from: "", to: "" }]);
+        setTotalExperience(null);
       } catch (error) {
-        console.error("Failed to save experience to localStorage", error);
+        console.error("Failed to save experience to Firestore", error);
         toast({
             title: "Error",
             description: "Could not save the experience.",
             variant: "destructive",
         });
+      } finally {
+        setIsSaving(false);
       }
     }
   };
+
+  if (loading) {
+    return (
+        <Card className="w-full max-w-3xl text-center p-8">
+            <p>Loading authentication status...</p>
+        </Card>
+    )
+  }
+
+  if (!user) {
+    return (
+        <Card className="w-full max-w-3xl">
+             <CardHeader className="text-center">
+                <div className="mx-auto bg-primary/10 text-primary p-3 rounded-full mb-4">
+                    <Briefcase className="h-10 w-10" />
+                </div>
+                <CardTitle className="text-3xl font-bold">Dairy Experience Calculator</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+                <ShieldAlert className="h-16 w-16 mx-auto text-destructive" />
+                <p className="text-xl font-medium">Please sign in to use this feature.</p>
+                <p className="text-muted-foreground">Saving and tracking experiences requires an account.</p>
+            </CardContent>
+        </Card>
+    )
+  }
 
   return (
     <Card className="w-full max-w-3xl">
@@ -198,9 +240,9 @@ export function ExperienceCalculator() {
                     {totalExperience.years} <span className="text-3xl font-medium text-foreground">years</span>, {totalExperience.months} <span className="text-3xl font-medium text-foreground">months</span>, {totalExperience.days} <span className="text-3xl font-medium text-foreground">days</span>
                 </p>
             </div>
-            <Button onClick={saveExperience} className="w-full sm:w-auto">
+            <Button onClick={saveExperience} className="w-full sm:w-auto" disabled={isSaving}>
                 <Save className="mr-2 h-5 w-5" />
-                Save Experience
+                {isSaving ? "Saving..." : "Save Experience"}
             </Button>
         </CardFooter>
       )}
